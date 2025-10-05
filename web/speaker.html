@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Speaker</h2>
+    <button onclick="join()">Start Speaking</button>
+
+    <script src="https://unpkg.com/livekit-client/dist/livekit-client.umd.js"></script>
+    <script>
+      async function join() {
+        const res = await fetch("http://localhost:8000/get-token?identity=speaker&room=room-english");
+        const data = await res.json();
+
+        const room = new LivekitClient.Room();
+        await room.connect(data.url, data.token);
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        await room.localParticipant.publishTrack(stream.getTracks()[0], { name: "mic" });
+
+        console.log("Speaker connected to room-english");
+      }
+    </script>
+  </body>
+</html>

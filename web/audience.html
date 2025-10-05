@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Audience</h2>
+    <select id="lang">
+      <option value="tamil">Tamil</option>
+      <option value="kannada">Kannada</option>
+      <option value="hindi">Hindi</option>
+    </select>
+    <button onclick="join()">Join</button>
+
+    <script src="https://unpkg.com/livekit-client/dist/livekit-client.umd.js"></script>
+    <script>
+      async function join() {
+        const lang = document.getElementById("lang").value;
+        const roomName = "room-" + lang;
+        const res = await fetch(`http://localhost:8000/get-token?identity=audience-${lang}&room=${roomName}`);
+        const data = await res.json();
+
+        const room = new LivekitClient.Room();
+        await room.connect(data.url, data.token);
+
+        room.on("trackSubscribed", (track, publication, participant) => {
+          if (track.kind === "audio") {
+            const audioEl = document.createElement("audio");
+            audioEl.autoplay = true;
+            track.attach(audioEl);
+            document.body.appendChild(audioEl);
+          }
+        });
+
+        console.log(`Audience joined ${roomName}`);
+      }
+    </script>
+  </body>
+</html>
