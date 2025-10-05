@@ -116,6 +116,8 @@ async def entrypoint(ctx: JobContext):
             logger.info(f"Generated token for room '{room_name}' with unique identity: '{identity}'")
 
             await room.connect(LIVEKIT_URL, token)
+            while room.connection_state != rtc.ConnectionState.CONN_CONNECTED:
+                await asyncio.sleep(0.1)
             translation_rooms[lang] = room
             logger.info(f"Successfully connected to translation room: {room_name}")
         except Exception as e:
@@ -189,6 +191,9 @@ async def entrypoint(ctx: JobContext):
             if publication.kind == rtc.TrackKind.AUDIO:
                 on_track_published(publication, participant)
 
+    # UPDATED: Explicitly signal that the agent is fully connected and ready.
+    await ctx.connect()
+
     logger.info("Orchestrator is running and waiting for speaker.")
     try:
         await asyncio.Event().wait()
@@ -202,5 +207,6 @@ if __name__ == "__main__":
     if not all([LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET]):
         raise ValueError("LIVEKIT_URL, LIVEKIT_API_KEY, and LIVEKIT_API_SECRET must be set in environment variables.")
 
-    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
+    # UPDATED: Set an agent_name to enable explicit dispatch
+    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, agent_name="translation-orchestrator"))
 
