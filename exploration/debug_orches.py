@@ -228,11 +228,18 @@ class TranslationPipeline:
             logger.info(f"Published subtitle to {lang} data channel.")
 
             logger.info(f"Synthesizing TTS for '{translated_text}'")
-            tts_stream = await tts.synthesize(translated_text)
+            tts_stream = tts.synthesize(translated_text)
 
             frame_count = 0
             async for frame in tts_stream:
-                await audio_source.capture_frame(frame)
+                # DEBUG: Check the actual frame properties
+                if frame_count == 0:
+                    logger.info(
+                        f"TTS Frame - Sample rate: {frame.frame.sample_rate}Hz, Channels: {frame.frame.num_channels}")
+                    logger.info(
+                        f"AudioSource - Expected sample rate: {audio_source.sample_rate}Hz, Channels: {audio_source.num_channels}")
+
+                await audio_source.capture_frame(frame.frame)
                 frame_count += 1
 
             logger.info(f"Published {frame_count} audio frames for {lang}.")
@@ -339,15 +346,20 @@ async def entrypoint(ctx: JobContext):
             room = translation_rooms.get(lang)
             if room:
                 # Create audio source with proper sample rate
-                audio_source = rtc.AudioSource(24000, 1)  # Match TTS output sample rate
+                audio_source = rtc.AudioSource(22050, 1)  # Match TTS output sample rate
                 audio_sources[lang] = audio_source
 
                 # Create and publish audio track
                 track = rtc.LocalAudioTrack.create_audio_track(f"{lang}-translation", audio_source)
-                options = rtc.TrackPublishOptions()
-                options.source = rtc.TrackSource.SOURCE_MICROPHONE
+                # options = rtc.TrackPublishOptions()
+                # options.source = rtc.TrackSource.SOURCE_MICROPHONE
 
-                await room.local_participant.publish_track(track, options)
+                # audio_source = rtc.AudioSource(24000, 1)
+                # audio_sources[lang] = audio_source
+                # track = rtc.LocalAudioTrack.create_audio_track(f"{lang}-translation", audio_source)
+                # await room.local_participant.publish_track(track)
+
+                await room.local_participant.publish_track(track)
                 logger.info(f"Published audio track for {lang} to room {room.name}")
         logger.info(f"Created {len(audio_sources)} audio sources")
         for lang in audio_sources:
