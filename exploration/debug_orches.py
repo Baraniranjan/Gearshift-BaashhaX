@@ -59,10 +59,10 @@ class TranslationPipeline:
         self._audio_sources = audio_sources
         self._translation_rooms = translation_rooms
         self._vad = silero.VAD.load(
-            min_speech_duration=0.05,  # Very short minimum speech duration
-            min_silence_duration=0.3,  # Shorter silence duration
-            padding_duration=200,  # Less padding
-            activation_threshold=0.3,  # Lower threshold (more sensitive)
+            min_speech_duration=0.2,  # Very short minimum speech duration
+            min_silence_duration=0.7,  # Shorter silence duration
+            # padding_duration=200,  # Less padding
+            activation_threshold=0.6,  # Lower threshold (more sensitive)
         )
         self._task = None
         self._pipe_audio_task = None

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Client</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            margin: 0;
+        }
+        h2 { color: #333; margin-bottom: 30px; }
+        .language-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .language-btn:hover { background: #0056b3; }
+        .language-btn.active {
+            background: #28a745;
+            transform: scale(1.05);
+        }
+        #audioControls {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #audioPlayer {
+            width: 100%;
+            margin: 15px 0;
+        }
+        #status {
+            margin-top: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-item {
+            margin: 10px 0;
+            padding: 5px;
+        }
+        .connected { color: #28a745; }
+        .disconnected { color: #dc3545; }
+        button.sync-btn {
+            background: #ffc107;
+            color: #000;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+🎧 Select Your Language
+
+
+<button class="language-btn" onclick="joinChannel('english')">🇺🇸 English</button>
+<button class="language-btn" onclick="joinChannel('spanish')">🇪🇸 Español</button>
+<button class="language-btn" onclick="joinChannel('french')">🇫🇷 Français</button>
+    <button class="language-btn" onclick="joinChannel('hindi')">🇮🇳 हिंदी</button>
+
+    <div id="audioControls" style="display: none;">
+
+🔊 Audio Player
+
+        <audio id="audioPlayer" controls preload="auto">
+
+
+
+            <button class="sync-btn" onclick="requestSync()">🔄 Sync Audio</button>\
+        </audio>
+    </div>
+
+    <div id="status">
+        <div class="status-item">
+            Connection:
+            <span id="connectionStatus" class="disconnected">Connecting...</span></div>
+
+        <div class="status-item">
+            Language:
+            <span id="currentLanguage">None selected</span></div>
+
+        <div class="status-item">
+            Audio Status:
+            <span id="audioStatus">Ready</span></div>
+    </div>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const audioPlayer = document.getElementById('audioPlayer');
+        let currentChannel = null;
+
+        socket.on('connect', () => {
+            document.getElementById('connectionStatus').textContent = 'Connected';
+            document.getElementById('connectionStatus').className = 'connected';
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('connectionStatus').textContent = 'Disconnected';
+            document.getElementById('connectionStatus').className = 'disconnected';
+        });
+
+        socket.on('audio-url', (url) => {
+            audioPlayer.src = url;
+            document.getElementById('audioControls').style.display = 'block';
+            document.getElementById('audioStatus').textContent = 'Audio loaded';
+        });
+
+        socket.on('video-play', (timestamp) => {
+            audioPlayer.currentTime = timestamp;
+            audioPlayer.play();
+            document.getElementById('audioStatus').textContent = 'Playing';
+        });
+
+        socket.on('video-pause', (timestamp) => {
+            audioPlayer.pause();
+            document.getElementById('audioStatus').textContent = 'Paused';
+        });
+
+        socket.on('video-seek', (timestamp) => {
+            audioPlayer.currentTime = timestamp;
+            document.getElementById('audioStatus').textContent = 'Synced';
+        });
+
+        function joinChannel(language) {
+            // Update UI
+            document.querySelectorAll('.language-btn').forEach(btn =>
+                btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Join channel
+            socket.emit('join-channel', language);
+            currentChannel = language;
+            document.getElementById('currentLanguage').textContent = language.charAt(0).toUpperCase() + language.slice(1);
+        }
+
+        function requestSync() {
+            socket.emit('sync-request');
+            document.getElementById('audioStatus').textContent = 'Sync requested';
+        }
+    </script>
+</body>
+</html>

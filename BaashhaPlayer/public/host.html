@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Host - Multilingual Audio</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        #video-container { max-width: 1200px; margin: 0 auto; }
+        video { width: 100%; max-height: 70vh; background: black; }
+        #controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        #status {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-around;
+        }
+        #qr-code { margin: 20px 0; text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+
+🎬 Multilingual Movie Player
+
+
+        <video id="mainVideo" controls>
+            <source src="movie.mp4" type="video/mp4">
+
+Your browser doesn't support HTML5 video.
+
+        </video>
+
+
+        <div id="controls">
+
+Broadcast Controls
+
+            <button onclick="broadcastPlay()">▶️ Broadcast Play</button>
+            <button onclick="broadcastPause()">⏸️ Broadcast Pause</button>
+            <button onclick="broadcastSeek()">🔄 Sync All Devices</button></div>
+
+
+        <div id="status">
+
+
+                Connected Users:
+            <span id="userCount">0</span>
+
+
+
+
+                Server URL:
+                <span id="serverURL">Loading...</span>
+
+
+
+
+                Status:
+                    <span id="serverStatus">Running</span>
+
+
+        </div></div>
+
+        <div id="qr-code">
+
+📱 Mobile users scan QR code or visit:</div>
+
+
+            <div id="mobileURL" style="font-size: 18px; color: #007bff;"></div>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const video = document.getElementById('mainVideo');
+
+        socket.on('connect', () => {
+            document.getElementById('serverStatus').textContent = 'Connected';
+        });
+
+        socket.on('user-count', (count) => {
+            document.getElementById('userCount').textContent = count;
+        });
+
+        function broadcastPlay() {
+            const currentTime = video.currentTime;
+            socket.emit('video-play', currentTime);
+            video.play();
+            console.log('Broadcasting play at:', currentTime);
+        }
+
+        function broadcastPause() {
+            const currentTime = video.currentTime;
+            socket.emit('video-pause', currentTime);
+            video.pause();
+            console.log('Broadcasting pause at:', currentTime);
+        }
+
+        function broadcastSeek() {
+            const currentTime = video.currentTime;
+            socket.emit('video-seek', currentTime);
+            console.log('Broadcasting seek to:', currentTime);
+        }
+
+        // Get server IP and display URLs
+        fetch('/api/ip')
+            .then(r => r.text())
+            .then(ip => {
+                const port = window.location.port;
+                const serverURL = `http://${ip}:${port}`;
+                const mobileURL = `${serverURL}/client.html`;
+
+                document.getElementById('serverURL').textContent = serverURL;
+                document.getElementById('mobileURL').textContent = mobileURL;
+            });
+    </script>
+</body>
+</html>

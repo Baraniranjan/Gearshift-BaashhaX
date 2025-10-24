@@ -1,0 +1,53 @@
+<!-- public/host.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Host</title>
+</head>
+<body>
+    <div id="video-container">
+        <video id="mainVideo" width="100%" controls>
+            <source src="/movie.mp4" type="video/mp4">
+        </video>
+
+
+        <div id="controls">
+            <button onclick="broadcastPlay()">Broadcast Play</button>
+            <button onclick="broadcastPause()">Broadcast Pause</button>
+            <button onclick="broadcastSeek()">Sync All</button>
+        </div>
+
+
+        <div id="status">
+            Connected Users: <span id="userCount">0</span>
+            Server IP: <span id="serverIP"></span>
+
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const video = document.getElementById('mainVideo');
+
+        function broadcastPlay() {
+            socket.emit('video-play', video.currentTime);
+            video.play();
+        }
+
+        function broadcastPause() {
+            socket.emit('video-pause', video.currentTime);
+            video.pause();
+        }
+
+        function broadcastSeek() {
+            socket.emit('video-seek', video.currentTime);
+        }
+
+        // Display server IP
+        fetch('/api/ip').then(r => r.text()).then(ip => {
+            document.getElementById('serverIP').textContent = ip;
+        });
+    </script>
+</body>
+</html>

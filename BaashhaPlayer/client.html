@@ -1,0 +1,99 @@
+<!-- public/client.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Client</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial; padding: 20px; text-align: center; }
+        .language-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+        }
+        .language-btn.active { background: #28a745; }
+        #audioControls { margin-top: 20px; }
+        #status { margin-top: 20px; color: #666; }
+    </style>
+</head>
+<body>
+
+Select Language
+
+
+<button class="language-btn" onclick="joinChannel('english')">English</button>
+<button class="language-btn" onclick="joinChannel('spanish')">Español</button>
+<button class="language-btn" onclick="joinChannel('french')">Français</button>
+<button class="language-btn" onclick="joinChannel('hindi')">हिंदी</button>
+
+    <div id="audioControls" style="display: none;">
+        <audio id="audioPlayer" controls style="width: 100%;">
+
+
+
+            <button onclick="requestSync()">Sync Audio</button></audio>
+    </div>
+
+    <div id="status">
+
+Status: <span id="connectionStatus">Disconnected</span>
+
+
+
+Language: <span id="currentLanguage">None</span>
+    </div>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const audioPlayer = document.getElementById('audioPlayer');
+        let currentChannel = null;
+
+        socket.on('connect', () => {
+            document.getElementById('connectionStatus').textContent = 'Connected';
+        });
+
+        socket.on('audio-url', (url) => {
+            audioPlayer.src = url;
+            document.getElementById('audioControls').style.display = 'block';
+        });
+
+        socket.on('video-play', (timestamp) => {
+            audioPlayer.currentTime = timestamp;
+            audioPlayer.play();
+        });
+
+        socket.on('video-pause', (timestamp) => {
+            audioPlayer.pause();
+        });
+
+        socket.on('video-seek', (timestamp) => {
+            audioPlayer.currentTime = timestamp;
+        });
+
+        function joinChannel(language) {
+            // Update UI
+            document.querySelectorAll('.language-btn').forEach(btn =>
+                btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Join channel
+            socket.emit('join-channel', language);
+            currentChannel = language;
+            document.getElementById('currentLanguage').textContent = language;
+        }
+
+        function requestSync() {
+            socket.emit('sync-request');
+        }
+    </script>
+</body>
+</html>

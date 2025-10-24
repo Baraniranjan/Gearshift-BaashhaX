@@ -1,10 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conference Translation - Audience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/livekit-client@2.1.5/dist/livekit-client.umd.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+    </style>
 </head>
-<body>
-$END$
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div id="connection-form" class="w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold mb-2 text-center text-indigo-400">Audience Client</h1>
+        <p class="text-gray-400 mb-6 text-center">Enter your details to join a language room.</p>
+
+        <div class="space-y-4">
+            <div>
+                <label for="url" class="block text-sm font-medium text-gray-300">LiveKit URL</label>
+                <input type="text" id="url" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="wss://your-project.livekit.cloud">
+            </div>
+            <div>
+                <label for="token" class="block text-sm font-medium text-gray-300">Access Token</label>
+                <input type="text" id="token" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Generated from token_generator.py">
+            </div>
+        </div>
+        <button id="connect-btn" class="mt-8 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-800 transition-colors duration-200 disabled:opacity-50">
+            Connect
+        </button>
+        <div id="error-message" class="text-red-400 mt-4 text-center h-4"></div>
+    </div>
+
+    <div id="room-display" class="hidden w-full h-screen flex flex-col items-center justify-between p-8">
+        <div class="w-full max-w-4xl text-center">
+            <h2 class="text-2xl font-bold text-indigo-400">Connected to Room: <span id="room-name" class="text-white"></span></h2>
+            <p id="status" class="text-green-400 font-medium">Listening for translation...</p>
+        </div>
+
+        <div class="flex-grow flex items-center justify-center w-full">
+            <div id="subtitles-container" class="w-full max-w-4xl min-h-[150px] bg-black bg-opacity-50 p-6 rounded-lg">
+                <p id="subtitles" class="text-4xl lg:text-5xl text-center font-semibold text-gray-200"></p>
+            </div>
+        </div>
+
+        <div class="w-full max-w-4xl text-center">
+             <button id="disconnect-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800 transition-colors duration-200">
+                Disconnect
+             </button>
+        </div>
+    </div>
+
+    <script>
+        const { Room, RoomEvent, DataPacket_Kind } = LivekitClient;
+
+        const connectionForm = document.getElementById('connection-form');
+        const roomDisplay = document.getElementById('room-display');
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const urlInput = document.getElementById('url');
+        const tokenInput = document.getElementById('token');
+        const roomNameSpan = document.getElementById('room-name');
+        const subtitlesP = document.getElementById('subtitles');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        let room = new Room();
+
+        // Load saved URL from localStorage
+        urlInput.value = localStorage.getItem('livekit-url') || '';
+
+        connectBtn.onclick = async () => {
+            const url = urlInput.value;
+            const token = tokenInput.value;
+            errorMessageDiv.innerText = '';
+
+            if (!url || !token) {
+                errorMessageDiv.innerText = 'Please provide both LiveKit URL and a Token.';
+                return;
+            }
+
+            // Save URL for next time
+            localStorage.setItem('livekit-url', url);
+
+            connectBtn.disabled = true;
+            connectBtn.innerText = 'Connecting...';
+
+            try {
+                await room.connect(url, token);
+                console.log('Successfully connected to room:', room.name);
+            } catch (error) {
+                console.error('Failed to connect to room:', error);
+                errorMessageDiv.innerText = `Connection failed: ${error.message}`;
+                connectBtn.disabled = false;
+                connectBtn.innerText = 'Connect';
+            }
+        };
+
+        disconnectBtn.onclick = async () => {
+            await room.disconnect();
+        };
+
+        // --- Room Event Listeners ---
+        room.on(RoomEvent.Connected, () => {
+            connectionForm.classList.add('hidden');
+            roomDisplay.classList.remove('hidden');
+            roomNameSpan.innerText = room.name;
+            connectBtn.disabled = false;
+            connectBtn.innerText = 'Connect';
+        });
+
+        room.on(RoomEvent.DataReceived, (payload, participant, kind) => {
+            if (kind === DataPacket_Kind.RELIABLE) {
+                const decoder = new TextDecoder();
+                const text = decoder.decode(payload);
+                console.log('Received subtitle:', text);
+                subtitlesP.innerText = text;
+            }
+        });
+
+        room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+            console.log('Track subscribed:', track.kind, 'from participant:', participant.identity);
+            if (track.kind === 'audio') {
+                const element = track.attach();
+                document.body.appendChild(element);
+                console.log('Attached and playing audio from:', participant.identity);
+            }
+        });
+
+        room.on(RoomEvent.Disconnected, () => {
+            console.log('Disconnected from room');
+            roomDisplay.classList.add('hidden');
+            connectionForm.classList.remove('hidden');
+            subtitlesP.innerText = '';
+            document.querySelectorAll('audio').forEach(el => el.remove());
+        });
+    </script>
 </body>
 </html>
+
