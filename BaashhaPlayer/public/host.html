@@ -1,136 +1,200 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Movie Host - Multilingual Audio</title>
-    <style>
-        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
-        #video-container { max-width: 1200px; margin: 0 auto; }
-        video { width: 100%; max-height: 70vh; background: black; }
-        #controls {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover { background: #0056b3; }
-        #status {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-around;
-        }
-        #qr-code { margin: 20px 0; text-align: center; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎬 Movie Host - Multilingual Audio</title>
+  <style>
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(160deg, #000000, #1a1a1a, #000000);
+      background-attachment: fixed;
+      margin: 0;
+      padding: 0;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-top: 40px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    }
+
+    #video-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: #0d0d0d;
+      border-radius: 15px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      border: 1px solid #222;
+    }
+
+    video {
+      width: 100%;
+      max-height: 65vh;
+      display: block;
+      background: #000;
+    }
+
+    #controls {
+      background: #111;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      border-bottom: 1px solid #222;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(45deg, #00c6ff, #0072ff);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+    }
+
+    #status {
+      background: #0f0f0f;
+      padding: 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      border-top: 1px solid #222;
+      border-bottom: 1px solid #222;
+    }
+
+    #status div {
+      margin: 5px 15px;
+      font-size: 16px;
+    }
+
+    #status span {
+      font-weight: 600;
+      color: #00d4ff;
+    }
+
+    #qr-code {
+      text-align: center;
+      margin: 30px 0 10px;
+      font-size: 20px;
+      font-weight: 500;
+      color: #eee;
+    }
+
+    #mobileURL {
+      text-align: center;
+      font-size: 18px;
+      color: #00d4ff;
+      word-break: break-word;
+      text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #999;
+      font-size: 14px;
+      opacity: 0.8;
+      padding-bottom: 30px;
+    }
+
+    @media (max-width: 700px) {
+      h1 {
+        font-size: 2rem;
+      }
+      #controls {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="video-container">
+  <h1>🎬 Multilingual Movie Broadcast Host</h1>
 
-🎬 Multilingual Movie Player
+  <div id="video-container">
+    <video id="mainVideo" controls>
+      <source src="movie.mp4" type="video/mp4" />
+      Your browser doesn't support HTML5 video.
+    </video>
 
+    <div id="controls">
+      <button onclick="broadcastPlay()">▶️ Broadcast Play</button>
+      <button onclick="broadcastPause()">⏸️ Broadcast Pause</button>
+      <button onclick="broadcastSeek()">🔄 Sync All Devices</button>
+    </div>
 
-        <video id="mainVideo" controls>
-            <source src="movie.mp4" type="video/mp4">
+    <div id="status">
+      <div>👥 Connected Users: <span id="userCount">0</span></div>
+      <div>🌐 Server URL: <span id="serverURL">Loading...</span></div>
+      <div>🟢 Status: <span id="serverStatus">Running</span></div>
+    </div>
+  </div>
 
-Your browser doesn't support HTML5 video.
+  <div id="qr-code">📱 Mobile users scan QR code or visit:</div>
+  <div id="mobileURL"></div>
 
-        </video>
+  <footer>Powered by <b>Baashha Player</b> • Real-time Multilingual Sync</footer>
 
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const video = document.getElementById('mainVideo');
 
-        <div id="controls">
+    socket.on('connect', () => {
+      document.getElementById('serverStatus').textContent = 'Connected';
+    });
 
-Broadcast Controls
+    socket.on('user-count', (count) => {
+      document.getElementById('userCount').textContent = count;
+    });
 
-            <button onclick="broadcastPlay()">▶️ Broadcast Play</button>
-            <button onclick="broadcastPause()">⏸️ Broadcast Pause</button>
-            <button onclick="broadcastSeek()">🔄 Sync All Devices</button></div>
+    function broadcastPlay() {
+      const currentTime = video.currentTime;
+      socket.emit('video-play', currentTime);
+      video.play();
+      console.log('Broadcasting play at:', currentTime);
+    }
 
+    function broadcastPause() {
+      const currentTime = video.currentTime;
+      socket.emit('video-pause', currentTime);
+      video.pause();
+      console.log('Broadcasting pause at:', currentTime);
+    }
 
-        <div id="status">
+    function broadcastSeek() {
+      const currentTime = video.currentTime;
+      socket.emit('video-seek', currentTime);
+      console.log('Broadcasting seek to:', currentTime);
+    }
 
+    fetch('/api/ip')
+      .then((r) => r.text())
+      .then((ip) => {
+        const port = window.location.port;
+        const serverURL = `http://${ip}:${port}`;
+        const mobileURL = `${serverURL}/client.html`;
 
-                Connected Users:
-            <span id="userCount">0</span>
-
-
-
-
-                Server URL:
-                <span id="serverURL">Loading...</span>
-
-
-
-
-                Status:
-                    <span id="serverStatus">Running</span>
-
-
-        </div></div>
-
-        <div id="qr-code">
-
-📱 Mobile users scan QR code or visit:</div>
-
-
-            <div id="mobileURL" style="font-size: 18px; color: #007bff;"></div>
-
-
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const video = document.getElementById('mainVideo');
-
-        socket.on('connect', () => {
-            document.getElementById('serverStatus').textContent = 'Connected';
-        });
-
-        socket.on('user-count', (count) => {
-            document.getElementById('userCount').textContent = count;
-        });
-
-        function broadcastPlay() {
-            const currentTime = video.currentTime;
-            socket.emit('video-play', currentTime);
-            video.play();
-            console.log('Broadcasting play at:', currentTime);
-        }
-
-        function broadcastPause() {
-            const currentTime = video.currentTime;
-            socket.emit('video-pause', currentTime);
-            video.pause();
-            console.log('Broadcasting pause at:', currentTime);
-        }
-
-        function broadcastSeek() {
-            const currentTime = video.currentTime;
-            socket.emit('video-seek', currentTime);
-            console.log('Broadcasting seek to:', currentTime);
-        }
-
-        // Get server IP and display URLs
-        fetch('/api/ip')
-            .then(r => r.text())
-            .then(ip => {
-                const port = window.location.port;
-                const serverURL = `http://${ip}:${port}`;
-                const mobileURL = `${serverURL}/client.html`;
-
-                document.getElementById('serverURL').textContent = serverURL;
-                document.getElementById('mobileURL').textContent = mobileURL;
-            });
-    </script>
+        document.getElementById('serverURL').textContent = serverURL;
+        document.getElementById('mobileURL').textContent = mobileURL;
+      });
+  </script>
 </body>
 </html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎬 Baashha Streaming</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(160deg, #000000, #1a1a1a, #000000);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 20px 40px;
+      background: #0d0d0d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    }
+
+    nav a {
+      color: #00d4ff;
+      margin-left: 25px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: #ffffff;
+    }
+
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 40px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .movie-card {
+      background: #111;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    }
+
+    .movie-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px rgba(0, 212, 255, 0.7);
+    }
+
+    .movie-card img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+    }
+
+    .movie-card .title {
+      padding: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      color: #00d4ff;
+      background: #0d0d0d;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: #999;
+      font-size: 14px;
+      opacity: 0.8;
+      background: #0d0d0d;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎬 Baashha Streaming</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Movies</a>
+      <a href="#">Series</a>
+      <a href="#">Live</a>
+    </nav>
+  </header>
+
+  <section class="movie-grid">
+    <div class="movie-card" onclick="openHost('Spider-Man.mp4')">
+      <img src="images/spiderman.jpg" alt="Spider-Man">
+      <div class="title">Spider-Man</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Venom.mp4')">
+      <img src="images/venom.jpg" alt="Venom">
+      <div class="title">Venom</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Jumanji.mp4')">
+      <img src="images/jumanji.jpg" alt="Jumanji">
+      <div class="title">Jumanji</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Bad-Boys.mp4')">
+      <img src="images/bad-boys.jpg" alt="Bad Boys">
+      <div class="title">Bad Boys</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Da-Vinci-Code.mp4')">
+      <img src="images/da-vinci-code.jpg" alt="The Da Vinci Code">
+      <div class="title">The Da Vinci Code</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Ghostbusters.mp4')">
+      <img src="images/ghostbusters.jpg" alt="Ghostbusters">
+      <div class="title">Ghostbusters</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Hotel-Transylvania.mp4')">
+      <img src="images/hotel-transylvania.jpg" alt="Hotel Transylvania">
+      <div class="title">Hotel Transylvania</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Men-in-Black.mp4')">
+      <img src="images/men-in-black.jpg" alt="Men in Black">
+      <div class="title">Men in Black</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Angry-Birds.mp4')">
+      <img src="images/angry-birds.jpg" alt="The Angry Birds Movie">
+      <div class="title">The Angry Birds Movie</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Resident-Evil.mp4')">
+      <img src="images/resident-evil.jpg" alt="Resident Evil">
+      <div class="title">Resident Evil</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Amazing-Spider-Man.mp4')">
+      <img src="images/amazing-spider-man.jpg" alt="The Amazing Spider-Man">
+      <div class="title">The Amazing Spider-Man</div>
+    </div>
+
+    <div class="movie-card" onclick="openHost('Skyfall.mp4')">
+      <img src="images/skyfall.jpg" alt="Skyfall">
+      <div class="title">Skyfall</div>
+    </div>
+  </section>
+
+  <footer>
+    Powered by <b>Baashha Player</b> • Real-time Multilingual Sync
+  </footer>
+
+  <script>
+    function openHost(movieFile) {
+      // If needed, pass the filename to host.html via query param:
+      // window.location.href = 'host.html?movie=' + encodeURIComponent(movieFile);
+      window.location.href = 'host.html';
+    }
+  </script>
+</body>
+</html>
