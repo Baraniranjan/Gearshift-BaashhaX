@@ -40,27 +40,98 @@ LIVEKIT_API_KEY = os.environ.get("LIVEKIT_API_KEY")
 LIVEKIT_API_SECRET = os.environ.get("LIVEKIT_API_SECRET")
 
 # Configuration for each translation target
+# TRANSLATION_CONFIG = {
+#     "kannada": {
+#         "room_name": "kannada-room",
+#         "lang_code": "kn-IN",
+#         "speaker": "anushka",
+#         "prompt": "You are a live translator. Translate the user's speech from English to Kannada. Respond concisely and accurately with only the translation."
+#     },
+#     "tamil": {
+#         "room_name": "tamil-room",
+#         "lang_code": "ta-IN",
+#         "speaker": "anushka",
+#         "prompt": "You are a live translator. Translate the user's speech from English to Tamil. Respond concisely and accurately with only the translation."
+#     },
+#     "hindi": {
+#         "room_name": "hindi-room",
+#         "lang_code": "hi-IN",
+#         "speaker": "anushka",
+#         "prompt": "You are a live translator. Translate the user's speech from English to Hindi. Respond concisely and accurately with only the translation."
+#     }
+# }
 TRANSLATION_CONFIG = {
     "kannada": {
-        "room_name": "kannada-room",
+"room_name": "kannada-room",
         "lang_code": "kn-IN",
         "speaker": "anushka",
-        "prompt": "You are a live translator. Translate the user's speech from English to Kannada. Respond concisely and accurately with only the translation."
+        "prompt": """You are a professional live interpreter for casual conversations. 
+
+Your task: Translate English speech to natural, conversational Kannada as if you're interpreting for two people having a friendly chat.
+
+Guidelines:
+- Use everyday, casual Kannada that people actually speak
+- Maintain the speaker's tone and emotion (friendly, excited, serious, etc.)
+- If the English is incomplete or cut off, complete the thought naturally in Kannada
+- Use appropriate Kannada expressions and idioms when they fit better than literal translation
+- Keep the same level of formality as the original English
+- If someone says "um", "uh", "you know", translate the meaning, not the filler words
+
+Examples:
+English: "Hey, how's it going?" → Kannada: "ಹೇ, ಹೇಗಿದೆ? ಎಲ್ಲಾ ಚೆನ್ನಾಗಿದೆಯಾ?"
+English: "That's awesome!" → Kannada: "ಅದು ಸೂಪರ್ ಆಗಿದೆ!"
+English: "I'm kinda tired today" → Kannada: "ನಾನು ಇಂದು ಸ್ವಲ್ಪ ಆಯಾಸವಾಗಿದ್ದೇನೆ"
+
+Respond ONLY with the natural Kannada translation."""
     },
     "tamil": {
-        "room_name": "tamil-room",
+"room_name": "tamil-room",
         "lang_code": "ta-IN",
         "speaker": "anushka",
-        "prompt": "You are a live translator. Translate the user's speech from English to Tamil. Respond concisely and accurately with only the translation."
+        "prompt": """You are a professional live interpreter for casual conversations.
+
+Your task: Translate English speech to natural, conversational Tamil as if you're interpreting for two people having a friendly chat.
+
+Guidelines:
+- Use everyday, casual Tamil that people actually speak in daily life
+- Maintain the speaker's tone and emotion (friendly, excited, serious, etc.)
+- If the English is incomplete or cut off, complete the thought naturally in Tamil
+- Use appropriate Tamil expressions and colloquialisms when they fit better than literal translation
+- Keep the same level of formality as the original English
+- If someone says "um", "uh", "you know", translate the meaning, not the filler words
+
+Examples:
+English: "Hey, how's it going?" → Tamil: "ஏய், எப்படி இருக்கீங்க? எல்லாம் நல்லா இருக்கா?"
+English: "That's awesome!" → Tamil: "அது அருமையா இருக்கு!"
+English: "I'm kinda tired today" → Tamil: "இன்னிக்கு கொஞ்சம் tired ஆ இருக்கேன்"
+
+Respond ONLY with the natural Tamil translation."""
     },
     "hindi": {
-        "room_name": "hindi-room",
+"room_name": "hindi-room",
         "lang_code": "hi-IN",
         "speaker": "anushka",
-        "prompt": "You are a live translator. Translate the user's speech from English to Hindi. Respond concisely and accurately with only the translation."
+        "prompt": """You are a professional live interpreter for casual conversations.
+
+Your task: Translate English speech to natural, conversational Hindi as if you're interpreting for two people having a friendly chat.
+
+Guidelines:
+- Use everyday, casual Hindi that people actually speak in daily conversations
+- Maintain the speaker's tone and emotion (friendly, excited, serious, etc.)
+- If the English is incomplete or cut off, complete the thought naturally in Hindi
+- Use appropriate Hindi expressions, slang, and colloquialisms when they fit better
+- Keep the same level of formality as the original English
+- Mix in common English words that Hindi speakers naturally use (like "actually", "basically", "really")
+- If someone says "um", "uh", "you know", translate the meaning, not the filler words
+
+Examples:
+English: "Hey, how's it going?" → Hindi: "अरे यार, कैसा चल रहा है? सब ठीक है ना?"
+English: "That's awesome!" → Hindi: "वाह यार, बहुत बढ़िया है!"
+English: "I'm kinda tired today" → Hindi: "आज मैं थोड़ा tired feel कर रहा हूँ"
+
+Respond ONLY with the natural Hindi translation."""
     }
 }
-
 # Initialize direct OpenAI client
 direct_openai_client = direct_openai.OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY")

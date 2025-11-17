@@ -180,7 +180,7 @@
 </head>
 
 <body>
-  <h1>🎧 BaashaX Streaming Platform</h1>
+  <h1>🎧 BaashaX Watch Together</h1>
   <p class="subtitle">Choose your language and enjoy perfectly synced multilingual audio.</p>
 
   <!-- LANGUAGE BUTTONS -->
@@ -210,9 +210,9 @@
       Language: <span id="currentLanguage">None selected</span>
     </div>
 
-    <div class="status-item">
-      Audio Status: <span id="audioStatus">Ready</span>
-    </div>
+<!--    <div class="status-item">-->
+<!--      Audio Status: <span id="audioStatus">Ready</span>-->
+<!--    </div>-->
   </div>
 
   <footer>Powered by <b>BaashhaX Player</b> • Real-time Multilingual Sync</footer>
@@ -243,7 +243,7 @@
     socket.on("audio-url", (url) => {
       audioPlayer.src = url;
       document.getElementById("audioControls").style.display = "block";
-      document.getElementById("audioStatus").textContent = "Audio loaded";
+      // document.getElementById("audioStatus").textContent = "Audio loaded";
     });
 
     /* PLAY */

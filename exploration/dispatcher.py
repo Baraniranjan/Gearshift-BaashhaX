@@ -12,6 +12,7 @@ LIVEKIT_URL = os.environ.get("LIVEKIT_URL")
 LIVEKIT_API_KEY = os.environ.get("LIVEKIT_API_KEY")
 LIVEKIT_API_SECRET = os.environ.get("LIVEKIT_API_SECRET")
 AGENT_NAME = "translation-orchestrator"
+# AGENT_NAME = "speech-to-speech-orchestrator"
 
 
 async def dispatch_agent(room_name: str):
