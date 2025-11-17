@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🎬 Movie Host - Multilingual Audio</title>
+
   <style>
     body {
       font-family: "Poppins", Arial, sans-serif;
@@ -130,7 +131,7 @@
 
   <div id="video-container">
     <video id="mainVideo" controls>
-      <source src="movie.mp4" type="video/mp4" />
+      <source src="jailer.mp4" type="video/mp4" />
       Your browser doesn't support HTML5 video.
     </video>
 
@@ -148,10 +149,11 @@
   </div>
 
   <div id="qr-code">📱 Mobile users scan QR code or visit:</div>
-  <div id="mobileURL"></div>
-
-  <footer>Powered by <b>Baashha Player</b> • Real-time Multilingual Sync</footer>
-
+<!--  <div id="mobileURL"></div>-->
+<!-- Replace the qr-container div with this -->
+<div id="qr-container">
+    <img id="qrcode" style="margin: 20px auto; display: block; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); width: 200px; height: 200px;" />
+    <div id="mobileURL" style="margin-top: 15px;"></div></div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
@@ -164,6 +166,13 @@
     socket.on('user-count', (count) => {
       document.getElementById('userCount').textContent = count;
     });
+
+    socket.on('sync-requested', (requesterId) => {
+  console.log('Sync requested by client:', requesterId);
+  // Send current video time to all clients
+  const currentTime = video.currentTime;
+  socket.emit('video-seek', currentTime);
+});
 
     function broadcastPlay() {
       const currentTime = video.currentTime;
@@ -185,16 +194,30 @@
       console.log('Broadcasting seek to:', currentTime);
     }
 
-    fetch('/api/ip')
-      .then((r) => r.text())
-      .then((ip) => {
-        const port = window.location.port;
-        const serverURL = `http://${ip}:${port}`;
-        const mobileURL = `${serverURL}/client.html`;
+  fetch('/api/ip')
+  .then((r) => r.text())
+  .then((ip) => {
+    const port = window.location.port;
+    const serverURL = `http://${ip}:${port}`;
+    const mobileURL = `${serverURL}/client.html`;
 
-        document.getElementById('serverURL').textContent = serverURL;
-        document.getElementById('mobileURL').textContent = mobileURL;
-      });
+    document.getElementById('serverURL').textContent = serverURL;
+    document.getElementById('mobileURL').textContent = mobileURL;
+
+    // Generate QR Code using online API
+    const qrImg = document.getElementById('qrcode');
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileURL)}`;
+    qrImg.onerror = function() {
+      // If QR service fails, hide image and show text
+      this.style.display = 'none';
+      document.getElementById('mobileURL').style.fontSize = '20px';
+      document.getElementById('mobileURL').style.fontWeight = 'bold';
+    };
+  })
+  .catch((error) => {
+    console.error('Failed to get IP:', error);
+    document.getElementById('mobileURL').textContent = 'Error loading server URL';
+  });
   </script>
 </body>
 </html>
