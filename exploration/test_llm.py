@@ -2,210 +2,227 @@ import asyncio
 import logging
 import os
 from dotenv import load_dotenv
-import openai
+from livekit.plugins import openai
+from livekit.agents.llm import ChatContext
 
 # Load environment variables
 load_dotenv()
 
-# Configure logging with UTF-8 support
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger("openai-mini-test")
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("livekit-openai-fixed")
 
 
-async def test_openai_with_debug():
-    """Test OpenAI with detailed debugging"""
+async def test_chatcontext_methods():
+    """Test different ways to create and use ChatContext"""
 
-    logger.info("=== Testing OpenAI with Debug ===")
+    logger.info("=== Testing ChatContext Methods ===")
 
     try:
-        # Initialize client
-        api_key = os.environ.get("OPENAI_API_KEY")
-        client = openai.OpenAI(api_key=api_key)
+        llm = openai.LLM()
 
-        # Test 1: Simple English response
-        logger.info("Test 1: Simple English response")
+        # Method 1: Create ChatContext and add messages using append
+        logger.info("Method 1: Using append to add messages")
+        try:
+            chat_ctx = ChatContext()
+            chat_ctx.append(role="user", text="Say hello in Hindi")
+
+            logger.info(f"ChatContext messages after append: {chat_ctx.messages}")
+
+            llm_stream = llm.chat(chat_ctx=chat_ctx)
+
+            response = ""
+            async for chunk in llm_stream:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    response += content
+                    logger.info(f"Content: {content}")
+
+            logger.info(f"✅ Method 1 SUCCESS: '{response}'")
+            return "Method 1"
+
+        except Exception as e:
+            logger.error(f"❌ Method 1 failed: {e}")
+
+        # Method 2: Create ChatContext with messages in constructor
+        logger.info("Method 2: Constructor with messages")
+        try:
+            messages = [{"role": "user", "content": "Say hello in Hindi"}]
+            chat_ctx = ChatContext(messages=messages)
+
+            logger.info(f"ChatContext messages: {chat_ctx.messages}")
+
+            llm_stream = llm.chat(chat_ctx=chat_ctx)
+
+            response = ""
+            async for chunk in llm_stream:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    response += content
+                    logger.info(f"Content: {content}")
+
+            logger.info(f"✅ Method 2 SUCCESS: '{response}'")
+            return "Method 2"
+
+        except Exception as e:
+            logger.error(f"❌ Method 2 failed: {e}")
+
+        # Method 3: Direct messages assignment
+        logger.info("Method 3: Direct messages assignment")
+        try:
+            chat_ctx = ChatContext()
+            chat_ctx.messages = [{"role": "user", "content": "Say hello in Hindi"}]
+
+            logger.info(f"ChatContext messages: {chat_ctx.messages}")
+            logger.info(f"ChatContext messages length: {len(chat_ctx.messages)}")
+
+            # Check if messages are properly set
+            for i, msg in enumerate(chat_ctx.messages):
+                logger.info(f"Message {i}: {msg}")
+
+            llm_stream = llm.chat(chat_ctx=chat_ctx)
+
+            response = ""
+            async for chunk in llm_stream:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    response += content
+                    logger.info(f"Content: {content}")
+
+            logger.info(f"✅ Method 3 SUCCESS: '{response}'")
+            return "Method 3"
+
+        except Exception as e:
+            logger.error(f"❌ Method 3 failed: {e}")
+
+        # Method 4: Check ChatContext attributes and methods
+        logger.info("Method 4: Exploring ChatContext")
+        try:
+            chat_ctx = ChatContext()
+            logger.info(f"ChatContext attributes: {[attr for attr in dir(chat_ctx) if not attr.startswith('_')]}")
+
+            # Check if there are other methods to add messages
+            if hasattr(chat_ctx, 'add_message'):
+                logger.info("Found add_message method")
+                chat_ctx.add_message(role="user", content="Say hello in Hindi")
+            elif hasattr(chat_ctx, 'add'):
+                logger.info("Found add method")
+                chat_ctx.add(role="user", content="Say hello in Hindi")
+            elif hasattr(chat_ctx, 'append_message'):
+                logger.info("Found append_message method")
+                chat_ctx.append_message(role="user", content="Say hello in Hindi")
+
+            logger.info(f"ChatContext messages: {chat_ctx.messages}")
+
+        except Exception as e:
+            logger.error(f"❌ Method 4 failed: {e}")
+
+        return None
+
+    except Exception as e:
+        logger.error(f"ChatContext test failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
+async def test_direct_openai():
+    """Test direct OpenAI client as backup"""
+
+    logger.info("=== Testing Direct OpenAI Client ===")
+
+    try:
+        import openai as openai_direct
+
+        client = openai_direct.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
         response = client.chat.completions.create(
-            model="gpt-5-mini",
-            messages=[
-                {"role": "user", "content": "Say 'Hello World' in English"}
-            ],
-            
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": "Say hello in Hindi"}],
+            max_tokens=100
         )
 
         result = response.choices[0].message.content
-        logger.info(f"English response: '{result}'")
-        logger.info(f"Response length: {len(result) if result else 0}")
-        logger.info(f"Response type: {type(result)}")
-
-        # Test 2: Hindi response with explicit encoding
-        logger.info("Test 2: Hindi response")
-        response = client.chat.completions.create(
-            model="gpt-5-mini",
-            messages=[
-                {"role": "user",
-                 "content": "Translate 'Hello World' to Hindi. Respond only with the Hindi translation."}
-            ],
-            
-        )
-
-        result = response.choices[0].message.content
-        logger.info(f"Hindi response: '{result}'")
-        logger.info(f"Hindi response encoded: {result.encode('utf-8') if result else 'None'}")
-
-        # Test 3: Translation test
-        logger.info("Test 3: Translation test")
-        test_text = "Good morning, how are you today?"
-
-        response = client.chat.completions.create(
-            model="gpt-5-mini",
-            messages=[
-                {"role": "system",
-                 "content": "You are a translator. Translate the following English text to Hindi. Respond only with the Hindi translation, no explanations."},
-                {"role": "user", "content": test_text}
-            ]
-        )
-
-        translation = response.choices[0].message.content
-        logger.info(f"Translation of '{test_text}': '{translation}'")
-
-        # Test 4: Check response object structure
-        logger.info("Test 4: Response object structure")
-        logger.info(f"Response object: {response}")
-        logger.info(f"Response choices: {response.choices}")
-        logger.info(f"First choice: {response.choices[0]}")
-        logger.info(f"Message: {response.choices[0].message}")
-        logger.info(f"Content: {response.choices[0].message.content}")
-
+        logger.info(f"✅ Direct OpenAI works: '{result}'")
         return True
 
     except Exception as e:
-        logger.error(f"Test failed: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"❌ Direct OpenAI failed: {e}")
         return False
 
 
-async def test_working_translation_function():
-    """Test the actual translation function you'll use"""
+async def test_translation_function():
+    """Test a working translation function using direct OpenAI"""
 
-    logger.info("=== Testing Working Translation Function ===")
+    logger.info("=== Testing Translation Function ===")
 
     try:
-        client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        import openai as openai_direct
+
+        client = openai_direct.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
         async def translate_text(text: str, target_language: str, prompt: str) -> str:
-            """Working translation function"""
+            """Translation function that works"""
             try:
                 loop = asyncio.get_event_loop()
 
                 def sync_translate():
                     response = client.chat.completions.create(
-                        model="gpt-5-mini",
+                        model="gpt-4o-mini",
                         messages=[
                             {"role": "system", "content": prompt},
                             {"role": "user", "content": text}
-                        ]
+                        ],
+                        max_tokens=200,
+                        temperature=0.3
                     )
-                    return response.choices[0].message.content or ""
+                    return response.choices[0].message.content
 
                 result = await loop.run_in_executor(None, sync_translate)
-                return result.strip()
+                return result
 
             except Exception as e:
-                logger.error(f"Translation error: {e}")
+                logger.error(f"Translation failed: {e}")
                 return ""
 
-        # Test translations
-        test_text = "Hello everyone, welcome to our meeting today."
+        # Test translation
+        test_text = "Hello, how are you today?"
+        prompt = "Translate the following English text to Hindi. Respond with only the translation."
 
-        translations = {
-            "hindi": "Translate the following English text to Hindi. Respond only with the Hindi translation.",
-            "tamil": "Translate the following English text to Tamil. Respond only with the Tamil translation.",
-            "kannada": "Translate the following English text to Kannada. Respond only with the Kannada translation."
-        }
+        result = await translate_text(test_text, "hindi", prompt)
+        logger.info(f"✅ Translation function works: '{result}'")
 
-        for lang, prompt in translations.items():
-            logger.info(f"Translating to {lang}...")
-            result = await translate_text(test_text, lang, prompt)
-            logger.info(f"✅ {lang}: '{result}'")
-
-            # Verify we got a non-empty result
-            if result and len(result.strip()) > 0:
-                logger.info(f"✅ {lang} translation successful (length: {len(result)})")
-            else:
-                logger.warning(f"⚠️ {lang} translation empty or failed")
-
-        return True
+        return translate_text
 
     except Exception as e:
-        logger.error(f"Translation function test failed: {e}")
-        return False
-
-
-async def test_streaming():
-    """Test streaming for real-time translation"""
-
-    logger.info("=== Testing Streaming ===")
-
-    try:
-        client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
-        stream = client.chat.completions.create(
-            model="gpt-5-mini",
-            messages=[
-                {"role": "system", "content": "Translate to Hindi. Respond only with the translation."},
-                {"role": "user", "content": "Good morning, how are you?"}
-            ],
-            max_tokens=100,
-            temperature=0.3,
-            stream=True
-        )
-
-        full_response = ""
-        chunk_count = 0
-
-        for chunk in stream:
-            chunk_count += 1
-            if chunk.choices[0].delta.content is not None:
-                content = chunk.choices[0].delta.content
-                full_response += content
-                logger.info(f"Chunk {chunk_count}: '{content}'")
-
-        logger.info(f"✅ Streaming complete: '{full_response}'")
-        logger.info(f"Total chunks: {chunk_count}")
-
-        return len(full_response.strip()) > 0
-
-    except Exception as e:
-        logger.error(f"Streaming test failed: {e}")
-        return False
+        logger.error(f"❌ Translation function failed: {e}")
+        return None
 
 
 async def main():
     """Run all tests"""
 
-    logger.info("Starting comprehensive OpenAI tests...")
+    logger.info("Starting LiveKit OpenAI troubleshooting...")
 
-    # Test 1: Debug test
-    if not await test_openai_with_debug():
-        logger.error("❌ Debug test failed")
-        return
+    # Test 1: Try different ChatContext methods
+    working_method = await test_chatcontext_methods()
 
-    # Test 2: Translation function
-    if not await test_working_translation_function():
-        logger.error("❌ Translation function test failed")
-        return
+    if working_method:
+        logger.info(f"🎉 Found working LiveKit method: {working_method}")
+    else:
+        logger.warning("❌ LiveKit OpenAI plugin not working properly")
 
+        # Test 2: Try direct OpenAI as backup
+        if await test_direct_openai():
+            logger.info("✅ Direct OpenAI works - we can use this as backup")
 
-
-    logger.info("🎉 All tests completed successfully!")
-    logger.info("✅ OpenAI GPT-5-mini is working and ready for your main application!")
+            # Test 3: Create working translation function
+            translate_func = await test_translation_function()
+            if translate_func:
+                logger.info("🎉 Working translation function created!")
+                logger.info("You can use direct OpenAI client instead of LiveKit plugin")
+        else:
+            logger.error("❌ Even direct OpenAI failed - check your API key")
 
 
 if __name__ == "__main__":

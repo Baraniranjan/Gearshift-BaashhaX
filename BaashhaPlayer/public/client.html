@@ -141,10 +141,10 @@
 <body>
   <h1>🎧 Multilingual Audio Client</h1>
 
-  <button class="language-btn" onclick="joinChannel('english')">🇺🇸 English</button>
-  <button class="language-btn" onclick="joinChannel('spanish')">🇪🇸 Español</button>
-  <button class="language-btn" onclick="joinChannel('french')">🇫🇷 Français</button>
-  <button class="language-btn" onclick="joinChannel('hindi')">🇮🇳 हिंदी</button>
+  <button class="language-btn" onclick="joinChannel('tamil')">Tamil</button>
+  <button class="language-btn" onclick="joinChannel('kannada')">Kannada</button>
+<!--  <button class="language-btn" onclick="joinChannel('french')">🇫🇷 Français</button>-->
+  <button class="language-btn" onclick="joinChannel('hindi')">हिंदी</button>
 
   <div id="audioControls" style="display: none;">
     <audio id="audioPlayer" controls preload="auto"></audio>
@@ -162,6 +162,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
+    const AUDIO_OFFSET = -0.5; // -500ms (negative means audio plays earlier)
     const audioPlayer = document.getElementById('audioPlayer');
     let currentChannel = null;
 
@@ -182,7 +183,7 @@
     });
 
     socket.on('video-play', (timestamp) => {
-      audioPlayer.currentTime = timestamp;
+      const adjustedTime = timestamp + AUDIO_OFFSET;audioPlayer.currentTime = Math.max(0, adjustedTime); // Ensure not negative
       audioPlayer.play();
       document.getElementById('audioStatus').textContent = 'Playing';
     });
@@ -193,7 +194,8 @@
     });
 
     socket.on('video-seek', (timestamp) => {
-      audioPlayer.currentTime = timestamp;
+      const adjustedTime = timestamp + AUDIO_OFFSET;
+    audioPlayer.currentTime = Math.max(0, adjustedTime);
       document.getElementById('audioStatus').textContent = 'Synced';
     });
 

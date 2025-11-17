@@ -2,13 +2,14 @@ import asyncio
 import logging
 import os
 import time
+import openai as direct_openai  # Add this import
 
 import aiohttp
 from dotenv import load_dotenv
 from livekit import rtc
 from livekit.api import AccessToken, VideoGrants
 from livekit.agents import JobContext, WorkerOptions, cli, vad, stt, ChatContext
-from livekit.plugins import openai, silero, assemblyai, sarvam
+from livekit.plugins import openai, silero, assemblyai, sarvam, elevenlabs
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -59,6 +60,36 @@ TRANSLATION_CONFIG = {
         "prompt": "You are a live translator. Translate the user's speech from English to Hindi. Respond concisely and accurately with only the translation."
     }
 }
+
+# Initialize direct OpenAI client
+direct_openai_client = direct_openai.OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY")
+)
+
+async def translate_with_openai(text: str, prompt: str) -> str:
+    """Translate text using direct OpenAI client"""
+    try:
+        loop = asyncio.get_event_loop()
+
+        def sync_translate():
+            response = direct_openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": text}
+                ],
+                max_tokens=200,
+                temperature=0.3
+            )
+            return response.choices[0].message.content
+
+        # Run sync function in thread pool
+        result = await loop.run_in_executor(None, sync_translate)
+        return result or ""
+
+    except Exception as e:
+        logger.error(f"OpenAI translation failed: {e}")
+        return ""
 
 
 class TranslationPipeline:
@@ -179,15 +210,8 @@ class TranslationPipeline:
             # Translation timing
             translation_start_time = time.time()
 
-            chat_ctx = ChatContext()
-            chat_ctx.add_message(role="system", content=TRANSLATION_CONFIG[lang]["prompt"])
-            chat_ctx.add_message(role="user", content=text)
-
-            translated_text = ""
-            async with llm.chat(chat_ctx=chat_ctx) as stream:
-                async for chunk in stream:
-                    if chunk.delta and chunk.delta.content:
-                        translated_text += chunk.delta.content
+            # Use direct OpenAI instead of LiveKit LLM
+            translated_text = await translate_with_openai(text, TRANSLATION_CONFIG[lang]["prompt"])
 
             translation_duration = (time.time() - translation_start_time) * 1000  # Convert to ms
 
@@ -258,19 +282,29 @@ async def entrypoint(ctx: JobContext):
 
         # 2. Initialize the processing pipeline components
         stt_instance = assemblyai.STT(http_session=http_session)
-        llm = openai.LLM.with_azure()
+        llm = None  # We use direct OpenAI instead
         tts_engines = {
             lang: sarvam.TTS(target_language_code=config["lang_code"], speaker=config["speaker"],
-                             http_session=http_session)
+                             http_session=http_session,model="bulbul:v2")
             for lang, config in TRANSLATION_CONFIG.items()
         }
+        # tts_engines = {
+        #     "hindi": elevenlabs.TTS(model="eleven_flash_v2_5"),  # Adam voice
+        #     "tamil": elevenlabs.TTS(model="eleven_flash_v2_5"),  # Bella voice
+        #     "kannada": elevenlabs.TTS(model="eleven_flash_v2_5"),  # Antoni voice
+        # }
+        # tts_engines = {
+        #     "hindi": openai.TTS(voice="alloy"),
+        #     "tamil": openai.TTS(voice="echo"),
+        #     "kannada": openai.TTS(voice="fable"),
+        # }
 
         # 3. Create audio tracks and data channels for publishing
         audio_sources = {}
         for lang, config in TRANSLATION_CONFIG.items():
             room = translation_rooms.get(lang)
             if room:
-                audio_source = rtc.AudioSource(22050, 1)
+                audio_source = rtc.AudioSource(22050, 1) #22050
                 audio_sources[lang] = audio_source
                 track = rtc.LocalAudioTrack.create_audio_track(f"{lang}-translation", audio_source)
                 await room.local_participant.publish_track(track)
