@@ -3,215 +3,290 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎧 Baashha Client - Multilingual Audio</title>
+  <title>🎧 BaashaX Multilingual Client</title>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    :root {
+      --accent: #61dcf4;
+      --accent-strong: #4ac8ff;
+      --accent-secondary: #0aff9d;
+      --warning: #f4c266;
+      --warning-strong: #f7a65a;
+      --bg-dark: #05070b;
+      --glass: rgba(255, 255, 255, 0.06);
+      --border-glass: rgba(255, 255, 255, 0.18);
+      --shadow-strong: 0 14px 32px rgba(0, 0, 0, 0.85);
+    }
 
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(160deg, #000000, #1a1a1a, #000000);
-      color: #ffffff;
-      text-align: center;
+      background: radial-gradient(circle at top, #0b1220, #000 60%);
+      color: #fff;
       margin: 0;
-      padding: 0;
-      overflow-x: hidden;
+      padding: 20px;
+      text-align: center;
     }
 
     h1 {
-      font-size: 2.5rem;
-      margin-top: 40px;
-      color: #fff;
-      text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
-      letter-spacing: 1px;
+      margin-top: 20px;
+      font-size: 2.4rem;
+      font-weight: 700;
+      text-shadow: 0 0 14px rgba(97, 220, 244, 0.55);
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #c2d6e4;
+      max-width: 360px;
+      margin: 0 auto 25px;
+      opacity: 0.8;
+      line-height: 1.4;
+    }
+
+    /* -------- LANGUAGE BUTTONS -------- */
+
+    #languagePanel {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
     }
 
     .language-btn {
-      display: block;
-      width: 90%;
-      max-width: 400px;
+      width: 100%;
       padding: 15px;
-      margin: 12px auto;
-      font-size: 18px;
+      margin: 10px 0;
       border: none;
-      border-radius: 10px;
-      background: linear-gradient(45deg, #00c6ff, #0072ff);
-      color: #fff;
-      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #3a7ef2, #4bd6f5);
+      box-shadow: 0 0 16px rgba(109,214,236,0.35);
       font-weight: 600;
-      letter-spacing: 0.5px;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+      cursor: pointer;
+      transition: .25s;
+      color: #fff;
     }
 
     .language-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+      box-shadow: 0 0 26px rgba(112, 220, 241, 0.8);
     }
 
     .language-btn.active {
-      background: linear-gradient(45deg, #28a745, #00d084);
-      box-shadow: 0 0 20px rgba(0, 255, 150, 0.6);
+      background: linear-gradient(90deg, #4ade96, #4acb82);
+      box-shadow: 0 0 26px rgba(74,220,160,0.8);
     }
 
+    /* -------- AUDIO CONTROLS -------- */
+
     #audioControls {
-      margin-top: 40px;
-      background: #0d0d0d;
-      border-radius: 15px;
-      padding: 25px;
+      display: none;
+      margin-top: 26px;
+      width: 100%;
       max-width: 500px;
+      padding: 20px;
+      background: var(--glass);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      box-shadow: var(--shadow-strong);
+      backdrop-filter: blur(12px);
       margin-left: auto;
       margin-right: auto;
-      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
-      border: 1px solid #222;
     }
 
     #audioPlayer {
       width: 100%;
-      border-radius: 10px;
-      margin: 15px 0;
+      border-radius: 12px;
+      margin: 10px 0 16px;
       background: #000;
+      box-shadow: 0 0 18px rgba(97, 220, 244, 0.2);
     }
 
     .sync-btn {
-      background: linear-gradient(45deg, #ffc107, #ff9800);
-      color: #000;
-      font-weight: 600;
-      padding: 12px 25px;
+      width: 100%;
+      background: linear-gradient(90deg, #4ba2f7, #4bd6f5);
+      color: #00141e;
+      padding: 12px;
       border: none;
-      border-radius: 10px;
-      font-size: 16px;
+      border-radius: 50px;
+      font-weight: 600;
       cursor: pointer;
-      letter-spacing: 0.5px;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+      margin-top: 10px;
+      box-shadow: 0 0 14px rgba(97, 200, 244, 0.6);
+      transition: .25s;
     }
 
     .sync-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(255, 193, 7, 0.7);
+      box-shadow: 0 0 22px rgba(97, 200, 244, 0.9);
     }
 
+    /* -------- STATUS PANEL -------- */
+
     #status {
-      margin-top: 40px;
-      background: #0f0f0f;
-      border-radius: 15px;
-      padding: 25px;
+      width: 100%;
       max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
-      border: 1px solid #222;
+      margin: 26px auto 0;
       text-align: left;
+      padding: 20px;
+      background: var(--glass);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      box-shadow: var(--shadow-strong);
     }
 
     .status-item {
-      margin: 10px 0;
-      font-size: 16px;
+      margin: 8px 0;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .status-item span {
-      font-weight: 600;
-      color: #00d4ff;
+    #connectionDot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ff4d4d;
+      box-shadow: 0 0 10px rgba(255, 77, 77, 0.8);
+    }
+
+    .connected-dot {
+      background: #00ff99 !important;
+      box-shadow: 0 0 12px rgba(0,255,153,1) !important;
     }
 
     .connected { color: #00ff99; }
     .disconnected { color: #ff4d4d; }
 
     footer {
-      text-align: center;
       margin-top: 40px;
+      opacity: 0.8;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 20px;
       color: #999;
       font-size: 14px;
       opacity: 0.8;
-      padding-bottom: 30px;
+      background: #0d0d0d;
+      margin-top: 40px;
     }
-
-    @media (max-width: 700px) {
-      h1 {
-        font-size: 2rem;
-      }
-      .language-btn {
-        font-size: 16px;
-      }
-    }
+    
   </style>
 </head>
 
 <body>
-  <h1>🎧 Multilingual Audio Client</h1>
+  <h1>🎧 BaashaX Streaming Platform</h1>
+  <p class="subtitle">Choose your language and enjoy perfectly synced multilingual audio.</p>
 
-  <button class="language-btn" onclick="joinChannel('tamil')">Tamil</button>
-  <button class="language-btn" onclick="joinChannel('kannada')">Kannada</button>
-<!--  <button class="language-btn" onclick="joinChannel('french')">🇫🇷 Français</button>-->
-  <button class="language-btn" onclick="joinChannel('hindi')">हिंदी</button>
+  <!-- LANGUAGE BUTTONS -->
+  <div id="languagePanel">
+    <button class="language-btn" onclick="joinChannel('tamil')">Tamil</button>
+    <button class="language-btn" onclick="joinChannel('kannada')">Kannada</button>
+    <button class="language-btn" onclick="joinChannel('hindi')">हिंदी</button>
+  </div>
 
-  <div id="audioControls" style="display: none;">
+  <!-- AUDIO CONTROLS -->
+  <div id="audioControls">
     <audio id="audioPlayer" controls preload="auto"></audio>
     <button class="sync-btn" onclick="requestSync()">🔄 Sync Audio</button>
   </div>
 
+  <!-- STATUS PANEL -->
   <div id="status">
-    <div class="status-item">🔌 Connection: <span id="connectionStatus" class="disconnected">Connecting...</span></div>
-    <div class="status-item">🌐 Language: <span id="currentLanguage">None selected</span></div>
-    <div class="status-item">🎵 Audio Status: <span id="audioStatus">Ready</span></div>
+    <div class="status-item">
+      <div id="connectionDot"></div>
+      <div>
+        Connection:
+        <span id="connectionStatus" class="disconnected">Connecting...</span>
+      </div>
+    </div>
+
+    <div class="status-item">
+      Language: <span id="currentLanguage">None selected</span>
+    </div>
+
+    <div class="status-item">
+      Audio Status: <span id="audioStatus">Ready</span>
+    </div>
   </div>
 
-  <footer>Powered by <b>Baashha Player</b> • Real-time Multilingual Sync</footer>
+  <footer>Powered by <b>BaashhaX Player</b> • Real-time Multilingual Sync</footer>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    /* ---------------- EXACT OLD FUNCTIONALITY ---------------- */
+
     const socket = io();
-    const AUDIO_OFFSET = -0.5; // -500ms (negative means audio plays earlier)
-    const audioPlayer = document.getElementById('audioPlayer');
-    let currentChannel = null;
+    const AUDIO_OFFSET = -0.5;
+    const audioPlayer = document.getElementById("audioPlayer");
 
-    socket.on('connect', () => {
-      document.getElementById('connectionStatus').textContent = 'Connected';
-      document.getElementById('connectionStatus').className = 'connected';
+    /* CONNECTION STATUS */
+    socket.on("connect", () => {
+      document.getElementById("connectionStatus").textContent = "Connected";
+      document.getElementById("connectionStatus").className = "connected";
+      document.getElementById("connectionDot").classList.add("connected-dot");
     });
 
-    socket.on('disconnect', () => {
-      document.getElementById('connectionStatus').textContent = 'Disconnected';
-      document.getElementById('connectionStatus').className = 'disconnected';
-    });
-
-    socket.on('audio-url', (url) => {
-      audioPlayer.src = url;
-      document.getElementById('audioControls').style.display = 'block';
-      document.getElementById('audioStatus').textContent = 'Audio loaded';
-    });
-
-    socket.on('video-play', (timestamp) => {
-      const adjustedTime = timestamp + AUDIO_OFFSET;audioPlayer.currentTime = Math.max(0, adjustedTime); // Ensure not negative
-      audioPlayer.play();
-      document.getElementById('audioStatus').textContent = 'Playing';
-    });
-
-    socket.on('video-pause', () => {
+    socket.on("disconnect", () => {
+      document.getElementById("connectionStatus").textContent = "Disconnected";
+      document.getElementById("connectionStatus").className = "disconnected";
+      document.getElementById("connectionDot").classList.remove("connected-dot");
       audioPlayer.pause();
-      document.getElementById('audioStatus').textContent = 'Paused';
     });
 
-    socket.on('video-seek', (timestamp) => {
-      const adjustedTime = timestamp + AUDIO_OFFSET;
-    audioPlayer.currentTime = Math.max(0, adjustedTime);
-      document.getElementById('audioStatus').textContent = 'Synced';
+    /* AUDIO URL RECEIVED */
+    socket.on("audio-url", (url) => {
+      audioPlayer.src = url;
+      document.getElementById("audioControls").style.display = "block";
+      document.getElementById("audioStatus").textContent = "Audio loaded";
     });
 
+    /* PLAY */
+    socket.on("video-play", (timestamp) => {
+      const t = Math.max(0, timestamp + AUDIO_OFFSET);
+      audioPlayer.currentTime = t;
+      audioPlayer.play();
+      document.getElementById("audioStatus").textContent = "Playing";
+    });
+
+    /* PAUSE */
+    socket.on("video-pause", () => {
+      audioPlayer.pause();
+      document.getElementById("audioStatus").textContent = "Paused";
+    });
+
+    /* SEEK */
+    socket.on("video-seek", (timestamp) => {
+      const t = Math.max(0, timestamp + AUDIO_OFFSET);
+      audioPlayer.currentTime = t;
+      document.getElementById("audioStatus").textContent = "Synced";
+    });
+
+    /* JOIN CHANNEL */
     function joinChannel(language) {
-      document.querySelectorAll('.language-btn').forEach(btn =>
-        btn.classList.remove('active'));
-      event.target.classList.add('active');
-      socket.emit('join-channel', language);
-      currentChannel = language;
-      document.getElementById('currentLanguage').textContent =
+      document.querySelectorAll(".language-btn").forEach(btn =>
+        btn.classList.remove("active")
+      );
+
+      const clicked = [...document.querySelectorAll(".language-btn")]
+        .find(btn => btn.textContent.toLowerCase().includes(language));
+
+      if (clicked) clicked.classList.add("active");
+
+      socket.emit("join-channel", language);
+      document.getElementById("currentLanguage").textContent =
         language.charAt(0).toUpperCase() + language.slice(1);
     }
 
+    /* REQUEST SYNC */
     function requestSync() {
-      socket.emit('sync-request');
-      document.getElementById('audioStatus').textContent = 'Sync requested';
+      socket.emit("sync-request");
+      document.getElementById("audioStatus").textContent = "Sync requested";
     }
   </script>
 </body>
