@@ -12,10 +12,10 @@ app.use(express.static('public'));
 
 // Audio channels
 const audioChannels = {
-  'english': '/audio/hindi.wav',
-  'spanish': '/audio/kannada.wav',
-  'french': '/audio/tamil.wav',
-  'hindi': '/audio/movie_hindi.mp3'
+  'hindi': '/audio/hindi.mp3',
+  'kannada': '/audio/kannada.mp3',
+  'tamil': '/audio/tamil.mp3',
+  // 'hindi': '/audio/movie_hindi.mp3'
 };
 
 let connectedUsers = 0
@@ -43,17 +43,16 @@ io.on('connection', (socket) => {
   io.emit('user-count', connectedUsers);
 
   socket.on('join-channel', (language) => {
+    console.log(`User ${socket.id} joined ${language} channel`);
     socket.join(language);
     socket.emit('audio-url', audioChannels[language]);
   });
-socket.on('sync-request', () => {
-    console.log(`Sync requested by ${socket.id}`);
-    socket.broadcast.emit('sync-requested', socket.id);
-  });
 
+  // FIX: Remove the duplicate sync-request handlers and the problematic one
   socket.on('sync-request', () => {
-    // Send current video timestamp
-    socket.emit('sync-time', getCurrentVideoTime());
+    console.log(`Sync requested by ${socket.id}`);
+    // Forward sync request to the host (video player)
+    socket.broadcast.emit('sync-requested', socket.id);
   });
 
   socket.on('video-play', (timestamp) => {
@@ -78,7 +77,8 @@ socket.on('sync-request', () => {
   });
 });
 
-
 server.listen(3001, '0.0.0.0', () => {
-  console.log('Server running on http://[YOUR-IP]:3001');
+  console.log('✅ Server running on http://localhost:3001');
+  console.log('📱 Mobile access: http://[YOUR-IP]:3001/client.html');
+  console.log('🖥️  Host access: http://localhost:3001/host.html');
 });

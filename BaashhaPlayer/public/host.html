@@ -3,198 +3,329 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎬 Movie Host - Multilingual Audio</title>
+  <title>🎬 BaashaX Streaming Host</title>
+
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    :root {
+      --accent: #61dcf4;
+      --accent-strong: #40bef8;
+      --accent-secondary: #0aff9d;
+      --bg-dark: #05070b;
+      --border-glass: rgba(255,255,255,0.1);
+      --shadow-strong: 0 18px 45px rgba(0,0,0,0.85);
+    }
+
     body {
       font-family: "Poppins", Arial, sans-serif;
-      background: linear-gradient(160deg, #000000, #1a1a1a, #000000);
-      background-attachment: fixed;
+      background: linear-gradient(-45deg, #000, #050914, #020b19, #000);
+      background-size: 400% 400%;
+      animation: bgFlow 16s ease infinite;
       margin: 0;
       padding: 0;
       color: #ffffff;
-      overflow-x: hidden;
+    }
+
+    
+    @keyframes bgFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     h1 {
       text-align: center;
-      font-size: 2.5rem;
-      margin-top: 40px;
-      letter-spacing: 1px;
-      text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+      font-size: 2.4rem;
+      margin: 35px 0 0;
+      font-weight: 700;
+      text-shadow: 0 0 18px rgba(97, 158, 170, 0.6),
+                   0 0 35px rgba(96, 156, 168, 0.5);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1rem;
+      opacity: 0.7;
+      margin-bottom: 20px;
+    }
+
+
+
+    #video-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.09);
+      box-shadow: var(--shadow-strong);
     }
 
     #video-container {
-      max-width: 1000px;
-      margin: 40px auto;
-      background: #0d0d0d;
-      border-radius: 15px;
-      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
       overflow: hidden;
-      border: 1px solid #222;
+      border-radius: 18px;
+      background: #000;
     }
 
     video {
       width: 100%;
       max-height: 65vh;
-      display: block;
       background: #000;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.85);
     }
 
     #controls {
-      background: #111;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      border-bottom: 1px solid #222;
+      text-align: center;
+      padding: 18px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
     }
 
-    button {
-      padding: 12px 25px;
-      font-size: 16px;
+    .primary-btn {
+      padding: 12px 26px;
+      border-radius: 50px;
       border: none;
-      border-radius: 8px;
-      background: linear-gradient(45deg, #00c6ff, #0072ff);
-      color: #fff;
       cursor: pointer;
       font-weight: 600;
-      letter-spacing: 0.5px;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+      color: #fff;
+      font-size: 1rem;
+      margin: 8px;
+      background: linear-gradient(90deg, #3a7ef2, #4bd6f5);
+      box-shadow: 0 0 12px rgba(110,224,247,0.5);
+      transition: 0.2s ease;
     }
 
-    button:hover {
+    .primary-btn.secondary {
+      background: linear-gradient(90deg, #f2c660, #f7a65a);
+      box-shadow: 0 0 14px rgba(243,201,104,0.4);
+    }
+
+    .primary-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+      box-shadow: 0 0 22px rgba(102,221,245,0.8);
     }
 
     #status {
-      background: #0f0f0f;
-      padding: 20px;
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
+      background: rgba(0,0,0,0.5);
+      padding: 16px;
+      margin-top: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
       flex-wrap: wrap;
-      border-top: 1px solid #222;
-      border-bottom: 1px solid #222;
+      gap: 14px;
     }
 
-    #status div {
-      margin: 5px 15px;
-      font-size: 16px;
+    .status-pill {
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      border-radius: 50px;
+      background: rgba(0,255,153,0.1);
+      color: #00ff99;
+      border: 1px solid rgba(0,255,153,0.5);
+      gap: 6px;
+      font-size: 0.9rem;
+      box-shadow: 0 0 12px rgba(0,255,153,0.4);
     }
 
-    #status span {
-      font-weight: 600;
-      color: #00d4ff;
+    .status-pill-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #00ff99;
     }
 
-    #qr-code {
+    .status-pill.offline {
+      background: rgba(255,0,0,0.15);
+      border-color: rgba(255,0,0,0.8);
+      color: #ff7373;
+    }
+
+    /* QR Popup */
+    #qrPopup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    #qrBox {
+      background: rgba(0,0,0,0.5);
+      padding: 28px;
+      width: 300px;
       text-align: center;
-      margin: 30px 0 10px;
-      font-size: 20px;
-      font-weight: 500;
-      color: #eee;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    #qrBox img {
+      width: 200px;
+      height: 200px;
+      border-radius: 12px;
+      margin: 14px 0;
     }
 
     #mobileURL {
-      text-align: center;
-      font-size: 18px;
-      color: #00d4ff;
+      color: #61dcf4;
+      margin-top: 6px;
+      font-size: 0.9rem;
       word-break: break-word;
-      text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
     }
 
     footer {
       text-align: center;
-      margin-top: 40px;
+      padding: 30px 20px;
       color: #999;
       font-size: 14px;
       opacity: 0.8;
-      padding-bottom: 30px;
+      background: #0d0d0d;
+      margin-top: 40px;
     }
 
-    @media (max-width: 700px) {
-      h1 {
-        font-size: 2rem;
-      }
-      #controls {
-        flex-direction: column;
-        gap: 10px;
-      }
-    }
   </style>
 </head>
+
 <body>
-  <h1>🎬 Multilingual Movie Broadcast Host</h1>
+  <h1>🎬 BaashaX Watch Together</h1>
+  <p class="subtitle">Control video playback & sync multilingual audio for all clients</p>
 
-  <div id="video-container">
-    <video id="mainVideo" controls>
-      <source src="movie.mp4" type="video/mp4" />
-      Your browser doesn't support HTML5 video.
-    </video>
+  <section id="video-shell">
+    <div id="video-container">
+      <video id="mainVideo" controls>
+        <source src="jailer.mp4" type="video/mp4" />
+      </video>
 
-    <div id="controls">
-      <button onclick="broadcastPlay()">▶️ Broadcast Play</button>
-      <button onclick="broadcastPause()">⏸️ Broadcast Pause</button>
-      <button onclick="broadcastSeek()">🔄 Sync All Devices</button>
+      <div id="controls">
+        <button class="primary-btn" onclick="broadcastPlay()">▶️ Broadcast Play</button>
+        <button class="primary-btn" onclick="broadcastPause()">⏸️ Broadcast Pause</button>
+        <button class="primary-btn" onclick="broadcastSeek()">🔄 Sync All Devices</button>
+      </div>
+
+      <div id="status">
+        <div>
+          <button class="primary-btn secondary" id="qrButton">📱 Show QR</button>
+        </div>
+        <div class="status-pill" id="statusPill">
+          <div class="status-pill-dot"></div>
+          <span id="serverStatus">Connected</span>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div id="status">
-      <div>👥 Connected Users: <span id="userCount">0</span></div>
-      <div>🌐 Server URL: <span id="serverURL">Loading...</span></div>
-      <div>🟢 Status: <span id="serverStatus">Running</span></div>
+  <!-- QR POPUP -->
+  <div id="qrPopup">
+    <div id="qrBox">
+      <h3>📱 Join Stream</h3>
+      <img id="qrcode" />
+      <div id="mobileURL"></div>
+      <button class="primary-btn" id="closeQR">Close</button>
     </div>
   </div>
 
-  <div id="qr-code">📱 Mobile users scan QR code or visit:</div>
-  <div id="mobileURL"></div>
-
-  <footer>Powered by <b>Baashha Player</b> • Real-time Multilingual Sync</footer>
+  <footer>Powered by <b>BaashhaX Player</b> • Real-time Multilingual Sync</footer>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-    const video = document.getElementById('mainVideo');
+    const video = document.getElementById("mainVideo");
 
-    socket.on('connect', () => {
-      document.getElementById('serverStatus').textContent = 'Connected';
+    const qrPopup = document.getElementById("qrPopup");
+    const qrButton = document.getElementById("qrButton");
+    const closeQR = document.getElementById("closeQR");
+    const qrImg = document.getElementById("qrcode");
+    const mobileURLText = document.getElementById("mobileURL");
+
+    const serverStatusEl = document.getElementById("serverStatus");
+    const statusPill = document.getElementById("statusPill");
+
+    /* ========== QR POPUP ========== */
+    // qrButton.onclick = () => qrPopup.style.display = "flex";
+    qrButton.onclick = () => {
+      qrPopup.style.display = "flex";
+      loadQR();   // <-- call function to load QR
+    };
+
+    closeQR.onclick = () => qrPopup.style.display = "none";
+
+    /* ========== SOCKET EVENTS (old functionality restored) ========== */
+    socket.on("connect", () => {
+      serverStatusEl.textContent = "Connected";
+      statusPill.classList.remove("offline");
     });
 
-    socket.on('user-count', (count) => {
+    socket.on("disconnect", () => {
+      serverStatusEl.textContent = "Disconnected";
+      statusPill.classList.add("offline");
+    });
+
+    socket.on("user-count", (count) => {
       document.getElementById('userCount').textContent = count;
     });
 
+    socket.on("sync-requested", (requesterId) => {
+      console.log("Sync requested by:", requesterId);
+      socket.emit("video-seek", video.currentTime);
+    });
+
+    /* ========== Broadcast Functions (OLD LOGIC) ========== */
     function broadcastPlay() {
-      const currentTime = video.currentTime;
-      socket.emit('video-play', currentTime);
+      const t = video.currentTime;
+      socket.emit("video-play", t);
       video.play();
-      console.log('Broadcasting play at:', currentTime);
     }
 
     function broadcastPause() {
-      const currentTime = video.currentTime;
-      socket.emit('video-pause', currentTime);
+      const t = video.currentTime;
+      socket.emit("video-pause", t);
       video.pause();
-      console.log('Broadcasting pause at:', currentTime);
     }
 
     function broadcastSeek() {
-      const currentTime = video.currentTime;
-      socket.emit('video-seek', currentTime);
-      console.log('Broadcasting seek to:', currentTime);
+      const t = video.currentTime;
+      socket.emit("video-seek", t);
     }
 
-    fetch('/api/ip')
-      .then((r) => r.text())
-      .then((ip) => {
-        const port = window.location.port;
-        const serverURL = `http://${ip}:${port}`;
-        const mobileURL = `${serverURL}/client.html`;
+    function loadQR() {
+      fetch('/api/ip')
+        .then(r => r.text())
+        .then(ip => {
+          const port = window.location.port || '3001';
+          const mobileURL = `http://${ip}:${port}/client.html`;
 
-        document.getElementById('serverURL').textContent = serverURL;
-        document.getElementById('mobileURL').textContent = mobileURL;
-      });
+          // Show mobile link
+          mobileURLText.textContent = "📱 Scan the QR below to watch the movie in your own language!";
+
+          // Load QR code image
+          qrImg.src =
+            `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(mobileURL)}`;
+        });
+}
+
+    /* ========== SERVER URL + QR LOGIC (OLD LOGIC) ========== */
+    // fetch('/api/ip')
+    //   .then(r => r.text())
+    //   .then(ip => {
+    //     const port = window.location.port;
+    //     const serverURL = `http://${ip}:${port}`;
+    //     const mobileURL = `${serverURL}/client.html`;
+
+    //     document.getElementById("serverURL").textContent = serverURL;
+    //     mobileURLText.textContent = mobileURL;
+
+    //     qrImg.src =
+    //       `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(mobileURL)}`;
+    //   });
   </script>
 </body>
 </html>
